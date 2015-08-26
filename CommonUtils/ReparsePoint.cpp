@@ -96,12 +96,13 @@ ScopedHandle OpenReparsePoint(const std::wstring& path, bool writable)
 
 static bool SetReparsePoint(const ScopedHandle& handle, typed_buffer_ptr<REPARSE_DATA_BUFFER>& reparse_buffer)
 {
+	DWORD cb;
 	if (!handle.IsValid()) {
 		return false;
 	}
 	
 	bool ret = DeviceIoControl(handle, FSCTL_SET_REPARSE_POINT,
-		reparse_buffer, reparse_buffer.size(), nullptr, 0, nullptr, nullptr) == TRUE;
+		reparse_buffer, reparse_buffer.size(), nullptr, 0, &cb, nullptr) == TRUE;
 	if (!ret)
 	{
 		g_last_error = GetLastError();
@@ -112,6 +113,7 @@ static bool SetReparsePoint(const ScopedHandle& handle, typed_buffer_ptr<REPARSE
 
 static bool DeleteReparsePoint(const ScopedHandle& handle, PREPARSE_GUID_DATA_BUFFER reparse_buffer)
 {
+	DWORD cb;
 	if (!handle.IsValid()) {
 		return false;
 	}
@@ -122,7 +124,7 @@ static bool DeleteReparsePoint(const ScopedHandle& handle, PREPARSE_GUID_DATA_BU
 		REPARSE_GUID_DATA_BUFFER_HEADER_SIZE,
 		nullptr,
 		0,
-		nullptr,
+		&cb,
 		0) == TRUE;
 
 	if (!ret)
