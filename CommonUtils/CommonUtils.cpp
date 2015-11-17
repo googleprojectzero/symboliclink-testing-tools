@@ -15,6 +15,7 @@
 #include "stdafx.h"
 #include "CommonUtils.h"
 #include <strsafe.h>
+#include "ntimports.h"
 
 void __stdcall my_puts(const char* str)
 {
@@ -104,11 +105,72 @@ BOOL SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege)
 	return TRUE;
 }
 
-typedef ULONG(NTAPI* _RtlNtStatusToDosError)(NTSTATUS status);
-
 DWORD NtStatusToDosError(NTSTATUS status)
 {
-	_RtlNtStatusToDosError func = (_RtlNtStatusToDosError)GetProcAddressNT("RtlNtStatusToDosError");
+	DEFINE_NTDLL(RtlNtStatusToDosError);
+	return fRtlNtStatusToDosError(status);
+}
 
-	return func(status);
+void SetNtLastError(NTSTATUS status)
+{
+	SetLastError(NtStatusToDosError(status));
+}
+
+FARPROC GetProcAddressNT(LPCSTR lpName)
+{
+	return GetProcAddress(GetModuleHandleW(L"ntdll"), lpName);
+}
+
+HANDLE OpenFileNative(LPCWSTR path, HANDLE root, ACCESS_MASK desired_access, ULONG share_access, ULONG open_options)
+{
+	UNICODE_STRING name = { 0 };
+	OBJECT_ATTRIBUTES obj_attr = { 0 };
+
+	DEFINE_NTDLL(RtlInitUnicodeString);
+	DEFINE_NTDLL(NtOpenFile);
+
+	if (path)
+	{
+		fRtlInitUnicodeString(&name, path);
+		InitializeObjectAttributes(&obj_attr, &name, OBJ_CASE_INSENSITIVE, root, nullptr);
+	}
+	else
+	{
+		InitializeObjectAttributes(&obj_attr, nullptr, OBJ_CASE_INSENSITIVE, root, nullptr);
+	}
+
+	HANDLE h = nullptr;
+	IO_STATUS_BLOCK io_status = { 0 };
+	NTSTATUS status = fNtOpenFile(&h, desired_access, &obj_attr, &io_status, share_access, open_options);
+	if (NT_SUCCESS(status))
+	{
+		return h;
+	}
+	else
+	{
+		SetNtLastError(status);
+		return nullptr;
+	}
+}
+
+std::wstring BuildFullPath(const std::wstring& path, bool native)
+{
+	std::wstring ret;
+	WCHAR buf[MAX_PATH];
+
+	if (native)
+	{
+		ret = L"\\??\\";
+	}
+
+	if (GetFullPathName(path.c_str(), MAX_PATH, buf, nullptr) > 0)
+	{
+		ret += buf;
+	}
+	else
+	{
+		ret += path;
+	}
+
+	return ret;
 }

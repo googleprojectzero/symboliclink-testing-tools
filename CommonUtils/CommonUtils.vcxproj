@@ -75,6 +75,7 @@
     <ClInclude Include="CommonUtils.h" />
     <ClInclude Include="FileOpLock.h" />
     <ClInclude Include="FileSymlink.h" />
+    <ClInclude Include="ntimports.h" />
     <ClInclude Include="ReparsePoint.h" />
     <ClInclude Include="ScopedHandle.h" />
     <ClInclude Include="stdafx.h" />
@@ -86,6 +87,7 @@
     <ClCompile Include="DirectoryObject.cpp" />
     <ClCompile Include="FileOpLock.cpp" />
     <ClCompile Include="FileSymlink.cpp" />
+    <ClCompile Include="Hardlink.cpp" />
     <ClCompile Include="NativeSymlink.cpp" />
     <ClCompile Include="RegistrySymlink.cpp" />
     <ClCompile Include="ReparsePoint.cpp" />

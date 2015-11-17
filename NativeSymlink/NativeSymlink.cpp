@@ -28,7 +28,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		LPCWSTR symlink = argv[1];
 		LPCWSTR target = argv[2];
 
-		HANDLE hSymlink = CreateSymlink(symlink, target);
+		HANDLE hSymlink = CreateSymlink(nullptr, symlink, target);
 		
 		if(hSymlink)
 		{

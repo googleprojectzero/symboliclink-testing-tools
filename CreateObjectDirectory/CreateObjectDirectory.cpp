@@ -18,13 +18,23 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	if (argc < 2)
 	{
-		printf("CreateObjectDirectory target\n");
+		printf("CreateObjectDirectory target [shadow]\n");
 		printf("Example: \\ABC\\XYZ\n");
 	}
 	else
-	{		
-		HANDLE hDir = CreateObjectDirectory(argv[1]);
+	{
+		HANDLE hShadow = nullptr;
+		if (argc > 2)
+		{
+			hShadow = OpenObjectDirectory(nullptr, argv[2]);
+			if (!hShadow)
+			{
+				DebugPrintf("Error opening shadow directory: %ls\n", GetErrorMessage().c_str());
+				return 1;
+			}
+		}
 
+		HANDLE hDir = CreateObjectDirectory(nullptr, argv[1], hShadow);
 		if (hDir)
 		{
 			DebugPrintf("Press ENTER to exit and delete the directory\n");
@@ -33,11 +43,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 		else
 		{
-			DebugPrintf("Error creating symlink\n");
+			DebugPrintf("Error creating object directory: %ls\n", GetErrorMessage().c_str());
 			return 1;
 		}
 	}
 
-	return 0;
+	return 1;
 }
 

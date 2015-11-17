@@ -182,7 +182,7 @@ bool FileSymlink::CreateSymlink(LPCWSTR xsymlink, LPCWSTR xtarget, LPCWSTR xbase
 	}
 	else
 	{
-		m_hlink = ::CreateSymlink(linkname, target);
+		m_hlink = ::CreateSymlink(nullptr, linkname, target);
 		if (!m_hlink)
 		{
 			return false;
@@ -231,7 +231,7 @@ bool FileSymlink::ChangeSymlink(LPCWSTR newtarget)
 		m_hlink = nullptr;
 
 
-		m_hlink = ::CreateSymlink(m_linkname, target);
+		m_hlink = ::CreateSymlink(nullptr, m_linkname, target);
 		if (!m_hlink)
 		{
 			return false;
