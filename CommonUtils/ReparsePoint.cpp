@@ -144,14 +144,14 @@ typed_buffer_ptr<REPARSE_DATA_BUFFER> BuildMountPoint(const std::wstring& target
 	typed_buffer_ptr<REPARSE_DATA_BUFFER> buffer(total_size);
 
 	buffer->ReparseTag = IO_REPARSE_TAG_MOUNT_POINT;	
-	buffer->ReparseDataLength = path_buffer_size;
+  buffer->ReparseDataLength = static_cast<USHORT>(path_buffer_size);
 	buffer->Reserved = 0;
 	
 	buffer->MountPointReparseBuffer.SubstituteNameOffset = 0;
-	buffer->MountPointReparseBuffer.SubstituteNameLength = target_byte_size;
+	buffer->MountPointReparseBuffer.SubstituteNameLength = static_cast<USHORT>(target_byte_size);
 	memcpy(buffer->MountPointReparseBuffer.PathBuffer, target.c_str(), target_byte_size + 2);
-	buffer->MountPointReparseBuffer.PrintNameOffset = target_byte_size + 2;
-	buffer->MountPointReparseBuffer.PrintNameLength = printname_byte_size;
+  buffer->MountPointReparseBuffer.PrintNameOffset = static_cast<USHORT>(target_byte_size + 2);
+	buffer->MountPointReparseBuffer.PrintNameLength = static_cast<USHORT>(printname_byte_size);
 	memcpy(buffer->MountPointReparseBuffer.PathBuffer + target.size() + 1, printname.c_str(), printname_byte_size + 2);
 
 	return buffer;
@@ -166,14 +166,14 @@ typed_buffer_ptr<REPARSE_DATA_BUFFER> BuildSymlink(const std::wstring& target, c
 	typed_buffer_ptr<REPARSE_DATA_BUFFER> buffer(total_size);
 
 	buffer->ReparseTag = IO_REPARSE_TAG_SYMLINK;
-	buffer->ReparseDataLength = path_buffer_size;
+	buffer->ReparseDataLength = static_cast<USHORT>(path_buffer_size);
 	buffer->Reserved = 0;
 
 	buffer->SymbolicLinkReparseBuffer.SubstituteNameOffset = 0;
-	buffer->SymbolicLinkReparseBuffer.SubstituteNameLength = target_byte_size;
+	buffer->SymbolicLinkReparseBuffer.SubstituteNameLength = static_cast<USHORT>(target_byte_size);
 	memcpy(buffer->SymbolicLinkReparseBuffer.PathBuffer, target.c_str(), target_byte_size + 2);
-	buffer->SymbolicLinkReparseBuffer.PrintNameOffset = target_byte_size + 2;
-	buffer->SymbolicLinkReparseBuffer.PrintNameLength = printname_byte_size;
+	buffer->SymbolicLinkReparseBuffer.PrintNameOffset = static_cast<USHORT>(target_byte_size + 2);
+	buffer->SymbolicLinkReparseBuffer.PrintNameLength = static_cast<USHORT>(printname_byte_size);
 	memcpy(buffer->SymbolicLinkReparseBuffer.PathBuffer + target.size() + 1, printname.c_str(), printname_byte_size + 2);
 	buffer->SymbolicLinkReparseBuffer.Flags = relative ? SYMLINK_FLAG_RELATIVE : 0;
 
@@ -254,7 +254,7 @@ bool ReparsePoint::CreateRawMountPoint(const std::wstring& path, DWORD reparse_t
 	typed_buffer_ptr<REPARSE_DATA_BUFFER> reparse_buffer(8 + buffer.size());
 
 	reparse_buffer->ReparseTag = reparse_tag;
-	reparse_buffer->ReparseDataLength = buffer.size();
+	reparse_buffer->ReparseDataLength = static_cast<USHORT>(buffer.size());
 	reparse_buffer->Reserved = 0;
 	memcpy(reparse_buffer->GenericReparseBuffer.DataBuffer, &buffer[0], buffer.size());
 
