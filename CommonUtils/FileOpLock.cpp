@@ -52,7 +52,7 @@ FileOpLock::~FileOpLock()
 	}
 }
 
-bool FileOpLock::BeginLock(const std::wstring& filename, DWORD dwShareMode)
+bool FileOpLock::BeginLock(const std::wstring& filename, DWORD dwShareMode, bool exclusive)
 {
 	g_hLockCompleted = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	g_o.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -61,7 +61,7 @@ bool FileOpLock::BeginLock(const std::wstring& filename, DWORD dwShareMode)
 
 	if (GetFileAttributesW(filename.c_str()) & FILE_ATTRIBUTE_DIRECTORY)
 	{
-		flags |= FILE_FLAG_BACKUP_SEMANTICS;
+		flags |= FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT;
 	}
 
 	g_hFile = CreateFileW(filename.c_str(), GENERIC_READ,
@@ -81,10 +81,25 @@ bool FileOpLock::BeginLock(const std::wstring& filename, DWORD dwShareMode)
 
 	SetThreadpoolWait(g_wait, g_o.hEvent, nullptr);
 
-	DeviceIoControl(g_hFile, FSCTL_REQUEST_OPLOCK,
-		&g_inputBuffer, sizeof(g_inputBuffer),
-		&g_outputBuffer, sizeof(g_outputBuffer),
-		nullptr, &g_o);
+	DWORD bytesReturned;
+
+  if (exclusive)
+  {
+    DeviceIoControl(g_hFile,
+      FSCTL_REQUEST_OPLOCK_LEVEL_1,
+      NULL, 0,
+      NULL, 0,
+      &bytesReturned,
+      &g_o);
+  }
+  else
+  {
+    DeviceIoControl(g_hFile, FSCTL_REQUEST_OPLOCK,
+      &g_inputBuffer, sizeof(g_inputBuffer),
+      &g_outputBuffer, sizeof(g_outputBuffer),
+      nullptr, &g_o);
+  }
+
 	DWORD err = GetLastError();
 	if (err != ERROR_IO_PENDING) {
 		DebugPrintf("Oplock Failed %d\n", err);
@@ -98,6 +113,7 @@ FileOpLock* FileOpLock::CreateLock(const std::wstring& name, const std::wstring&
 {
 	FileOpLock* ret = new FileOpLock(cb);
 	DWORD dwShareMode = 0;
+  bool exclusive = false;
 
 	if (share_mode.find('r') != std::wstring::npos)
 	{
@@ -114,7 +130,12 @@ FileOpLock* FileOpLock::CreateLock(const std::wstring& name, const std::wstring&
 		dwShareMode |= FILE_SHARE_DELETE;
 	}
 
-	if (ret->BeginLock(name, dwShareMode))
+  if (share_mode.find('x') != std::wstring::npos)
+  {
+    exclusive = true;
+  }
+
+	if (ret->BeginLock(name, dwShareMode, exclusive))
 	{
 		return ret;
 	}

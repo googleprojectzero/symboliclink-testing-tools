@@ -30,7 +30,7 @@ private:
 
 	void DoWaitCallback();
 
-	bool BeginLock(const std::wstring& name, DWORD dwShareMode);
+	bool BeginLock(const std::wstring& name, DWORD dwShareMode, bool exclusive);
 
 };
 
