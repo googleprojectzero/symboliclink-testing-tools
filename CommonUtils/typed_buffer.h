@@ -28,6 +28,7 @@ public:
 		memcpy(tmp.get(), buffer_.get(), min(size, size_));
 
 		buffer_ = std::move(tmp);
+		size_ = size;
 	}
 
 	operator T*() {
@@ -43,7 +44,7 @@ public:
 	}
 
 	const T* cget() const {
-		return interpret_cast<const T*>(buffer_.get());
+		return reinterpret_cast<const T*>(buffer_.get());
 	}
 
 	typed_buffer_ptr(const typed_buffer_ptr<T>& other) = delete;
