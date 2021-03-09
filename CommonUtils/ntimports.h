@@ -11,7 +11,7 @@
 
 typedef NTSTATUS(NTAPI *_NtCreateDirectoryObject)(PHANDLE Handle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes);
 typedef NTSTATUS(NTAPI *_NtCreateDirectoryObjectEx)(PHANDLE Handle, ACCESS_MASK DesiredAccess,
-	POBJECT_ATTRIBUTES ObjectAttributes, HANDLE ShadowDir, BOOLEAN Something);
+	POBJECT_ATTRIBUTES ObjectAttributes, HANDLE ShadowDir, ULONG Flags);
 typedef NTSTATUS(NTAPI *_NtOpenDirectoryObject)(PHANDLE Handle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes);
 typedef VOID(NTAPI *_RtlInitUnicodeString)(PUNICODE_STRING DestinationString, PCWSTR SourceString);
 

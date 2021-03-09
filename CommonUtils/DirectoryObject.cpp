@@ -35,7 +35,7 @@ HANDLE CreateObjectDirectory(HANDLE hRoot, LPCWSTR dirname, HANDLE hShadow)
 	}
 
 	HANDLE h = nullptr;
-	NTSTATUS status = fNtCreateDirectoryObjectEx(&h, DIRECTORY_ALL_ACCESS, &obj_attr, hShadow, FALSE);
+	NTSTATUS status = fNtCreateDirectoryObjectEx(&h, DIRECTORY_ALL_ACCESS, &obj_attr, hShadow, 0);
 	if (status == 0)
 	{
 		return h;
