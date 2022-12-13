@@ -32,3 +32,6 @@ packages/
 bin/
 *.db
 *.opendb
+
+# Visual Studio cache/options directory
+.vs/
